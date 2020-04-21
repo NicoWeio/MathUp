@@ -2,7 +2,8 @@
 <div id="app">
   <textarea v-model="input"></textarea>
   <pre>{{output}}</pre>
-  <vue-mathjax :formula="'$$' + output + '$$'"></vue-mathjax>
+  <button v-clipboard:copy="output">LaTex kopieren</button><br/><br/>
+  <vue-mathjax :formula="'$' + output + '$'"></vue-mathjax>
 </div>
 </template>
 
