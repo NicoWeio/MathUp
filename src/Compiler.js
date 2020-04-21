@@ -1,3 +1,66 @@
+function Root(s) {
+  let lines = s.split('\n');
+  return lines.map(line => Line(line)).join('\n');
+}
+
+function Line(s) {
+  // .replace(/\s+/g, ' ')
+  if (s.trim().length === 0) return '\\\\';
+  return s.split(' ').map(line => Expression(line)).join(' ');
+}
+
+function Expression(s) {
+  if (s.length === 1) {
+    return Char(s);
+  } else if (s.startsWith('(') && s.endsWith(')')) { //visible brackets
+    return Brackets(s.slice(1, -1));
+  } else if (s.startsWith('{') && s.endsWith('}')) { //invisible brackets
+    return InvisibleBrackets(s.slice(1, -1));
+  } else if (s.includes('/')) {
+    let matches = s.match(/^(.*)\/(.*)$/);
+    return Fraction(matches[1], matches[2]);
+  } else if (s.startsWith('$')) {
+    return Command(s.slice(1));
+  }
+  // else return "**" + s + "**";
+  else return s;
+}
+
+function Brackets(s) {
+  return '(' + Expression(s) + ')';
+}
+
+function InvisibleBrackets(s) {
+  return Expression(s);
+}
+
+function Char(s) {
+  switch (s) {
+    case '*':
+      return '\\cdot';
+    default:
+      return s;
+  }
+}
+
+function Command(s) {
+  // if (s.includes('{')) { //has arguments
+  let name = s.includes('{') ? s.slice(0, s.indexOf('{')) : s;
+  let args = s.substring(s.indexOf('{')).slice(1, -1).split('}{');
+  // } else {
+  // let name = s;
+  // }
+  switch (name) {
+    case 'mat':
+      {
+        let columns = args[0].split(',').map(c => Expression(c.trim()));
+        return `\\begin{pmatrix} ${columns.join(' \\\\ ')} \\end{pmatrix}`;
+      }
+    default:
+      return '?CMD?';
+  }
+}
+
 function Vector(s) {
   return `\\vec{${s}}`;
 }
@@ -7,10 +70,16 @@ function TexChar(s) {
 }
 
 function Fraction(top, bottom) {
-  return `\\frac{${top}}{${bottom}}`;
+  return `\\frac{${Expression(top)}}{${Expression(bottom)}}`;
 }
 
 const REPLACEMENTS = [{
+    id: 'ROOT',
+    search: /ROOT\[(.*)\]/g,
+    replace: (_, c) => Root(c),
+  },
+
+  {
     id: 'multiply',
     search: /\*/g,
     replace: ` \\cdot `,
@@ -77,9 +146,11 @@ const REPLACEMENTS = [{
 ];
 
 export default function compiler(input) {
-  for (let r of REPLACEMENTS) {
-    if (r.replace) input = input.replace(r.search, r.replace);
-    // else if (r.cb) input = cb(input);
-  }
-  return input;
+  console.log(REPLACEMENTS);
+  // for (let r of REPLACEMENTS) {
+  //   if (r.replace) input = input.replace(r.search, r.replace);
+  //   // else if (r.cb) input = cb(input);
+  // }
+  return Root(input);
+  // return input;
 }
