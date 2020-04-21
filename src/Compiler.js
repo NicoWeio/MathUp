@@ -2,6 +2,14 @@ function Vector(s) {
   return `\\vec{${s}}`;
 }
 
+function TexChar(s) {
+  return `\\${s}`;
+}
+
+function Fraction(top, bottom) {
+  return `\\frac{${top}}{${bottom}}`;
+}
+
 const REPLACEMENTS = [{
     id: 'multiply',
     search: /\*/g,
@@ -26,9 +34,44 @@ const REPLACEMENTS = [{
     replace: (match, contents) => Vector(contents),
   },
   {
+    id: 'vector2',
+    search: /\$vec(.)/g,
+    replace: (match, contents) => Vector(contents),
+  },
+  {
     id: 'lower',
     search: /_(.*?)\b/g,
     replace: "_{$1}",
+  },
+  {
+    id: 'nabla-to-vec',
+    search: /\$Nabla/g,
+    replace: Vector('\\nabla'),
+  },
+  {
+    id: 'cross-product',
+    search: /kreuz/g,
+    replace: TexChar('times'),
+  },
+  {
+    id: 'pmatrix',
+    search: /\$mat\{(.*?)\}/g,
+    replace: (_, c) => {
+      let columns = c.split(',').map(c => c.trim());
+      return `\\begin{pmatrix} ${columns.join(' \\\\ ')} \\end{pmatrix}`;
+    },
+  },
+  {
+    id: 'partielle-ableitung',
+    search: /\$del(.)/g,
+    replace: (_, c) => {
+      return Fraction('\\partial', `\\partial ${c}`);
+    },
+  },
+  {
+    id: 'plusminus',
+    search: /\+-/g,
+    replace: TexChar('pm'),
   },
 
 ];
