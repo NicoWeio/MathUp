@@ -1,28 +1,41 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+<div id="app">
+  <textarea v-model="input"></textarea>
+  <pre>{{output}}</pre>
+  <vue-mathjax :formula="'$$' + output + '$$'"></vue-mathjax>
+</div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+// import HelloWorld from './components/HelloWorld.vue'
+import Compiler from './Compiler.js';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    // HelloWorld
+  },
+  data() {
+    return {
+      input: 'foo * bar',
+    };
+  },
+  computed: {
+    output() {
+      try {
+        return Compiler(this.input);
+      } catch (e) {
+        console.warn(e);
+        return 'ERROR';
+      }
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+textarea {
+  width: 100%;
+  height: 50vh;
 }
 </style>
