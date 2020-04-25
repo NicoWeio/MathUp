@@ -27,7 +27,7 @@ function Expression(s) {
 }
 
 function Brackets(s) {
-  return '(' + Expression(s) + ')';
+  return '\\left(' + Expression(s) + '\\right)';
 }
 
 function InvisibleBrackets(s) {
