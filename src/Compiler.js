@@ -12,9 +12,9 @@ function Line(s) {
 function Expression(s) {
   if (s.length === 1) {
     return Char(s);
-  } else if (s.startsWith('(') && s.endsWith(')')) { //visible brackets
+  } else if (s.match(/^\(([^()]*)\)$/)) { //visible brackets
     return Brackets(s.slice(1, -1));
-  } else if (s.startsWith('{') && s.endsWith('}')) { //invisible brackets
+  } else if (s.match(/^\{([^{}]*)\}$/)) { //invisible brackets
     return InvisibleBrackets(s.slice(1, -1));
   } else if (s.includes('/')) {
     let matches = s.match(/^(.*)\/(.*)$/);
