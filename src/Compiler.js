@@ -12,9 +12,9 @@ function Line(s) {
 function Expression(s) {
   if (s.length === 1) {
     return Char(s);
-  } else if (s.match(/^\(([^()]*)\)$/)) { //visible brackets
+  } else if (s.match(/^\((.*)\)$/) && checkParenthesesWrap(s, '(', ')')) { //visible brackets
     return Brackets(s.slice(1, -1));
-  } else if (s.match(/^\{([^{}]*)\}$/)) { //invisible brackets
+  } else if (s.match(/^\{(.*)\}$/) && checkParenthesesWrap(s, '{', '}')) { //invisible brackets
     return InvisibleBrackets(s.slice(1, -1));
   } else if (s.includes('/')) {
     let matches = s.match(/^(.*)\/(.*)$/);
@@ -24,6 +24,19 @@ function Expression(s) {
   }
   // else return "**" + s + "**";
   else return s;
+}
+
+// checks whether there are mathing parentheses at top level
+function checkParenthesesWrap(source, open, close) {
+  if (!(source.startsWith(open) && source.endsWith(close))) return false;
+
+  let counter = 1;
+  for (let c of source.slice(1, -1).split('')) {
+    if (c === open) counter++;
+    else if (c === close) counter--;
+    if (counter === 0) return false;
+  }
+  return counter === 1;
 }
 
 function Brackets(s) {
