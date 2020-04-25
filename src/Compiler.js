@@ -167,3 +167,7 @@ export default function compiler(input) {
   return Root(input);
   // return input;
 }
+
+export {
+  Expression,
+};
