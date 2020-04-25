@@ -6,6 +6,7 @@ function Root(s) {
 function Line(s) {
   // .replace(/\s+/g, ' ')
   if (s.trim().length === 0) return '\\\\';
+  if (s.startsWith('#')) return Comment(s.slice(1).trim());
   return s.split(' ').map(line => Expression(line)).join(' ');
 }
 
@@ -72,6 +73,10 @@ function Command(s) {
     default:
       return '?CMD?';
   }
+}
+
+function Comment(s) {
+  return `\\intertext{${s}}`;
 }
 
 function Vector(s) {
