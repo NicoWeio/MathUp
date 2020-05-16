@@ -7,7 +7,15 @@ function Line(s) {
   // .replace(/\s+/g, ' ')
   if (s.trim().length === 0) return '\\\\';
   if (s.startsWith('#')) return Comment(s.slice(1).trim());
-  return s.split(' ').map(line => Expression(line)).join(' ');
+  let line = s
+    .split(' ')
+    .map(e => Expression(e))
+    .join(' ');
+  return removeExtraSpaces(line).trim();
+}
+
+function removeExtraSpaces(s) {
+  return s.replace(/\s{2,}/g, ' ');
 }
 
 function Expression(s) {
@@ -22,9 +30,16 @@ function Expression(s) {
     return Fraction(matches[1], matches[2]);
   } else if (s.startsWith('$')) {
     return Command(s.slice(1));
+  } else if (SIMPLE_REPLACEMENTS[s]) {
+    return SIMPLE_REPLACEMENTS[s];
   }
-  // else return "**" + s + "**";
-  else return s;
+  // else return s;
+  else {
+    for (let replacement of REPLACEMENTS) {
+      s = s.replace(replacement.search, replacement.replace);
+    }
+    return s;
+  }
 }
 
 // checks whether there are mathing parentheses at top level
@@ -49,12 +64,8 @@ function InvisibleBrackets(s) {
 }
 
 function Char(s) {
-  switch (s) {
-    case '*':
-      return '\\cdot';
-    default:
-      return s;
-  }
+  let replacement = CHAR_REPLACEMENTS[s];
+  return replacement || s;
 }
 
 function Command(s) {
@@ -70,6 +81,8 @@ function Command(s) {
         let columns = args[0].split(',').map(c => Expression(c.trim()));
         return `\\begin{pmatrix} ${columns.join(' \\\\ ')} \\end{pmatrix}`;
       }
+    case 'vec':
+      return Vector(args[0]);
     default:
       return '?CMD?';
   }
@@ -84,29 +97,27 @@ function Vector(s) {
 }
 
 function TexChar(s) {
-  return `\\${s}`;
+  return '\\' + s;
 }
+
+// function TexChar(s) {
+//   return `\\${s}`;
+// }
 
 function Fraction(top, bottom) {
   return `\\frac{${Expression(top)}}{${Expression(bottom)}}`;
 }
 
-const REPLACEMENTS = [{
-    id: 'ROOT',
-    search: /ROOT\[(.*)\]/g,
-    replace: (_, c) => Root(c),
-  },
+const CHAR_REPLACEMENTS = {
+  '*': ` \\cdot `,
+};
 
-  {
-    id: 'multiply',
-    search: /\*/g,
-    replace: ` \\cdot `,
-  },
-  {
-    id: 'frac',
-    search: /(\b.+?)\s?\/\s?(.+?\b)/g,
-    replace: `\\frac{$1}{$2}`,
-  },
+const SIMPLE_REPLACEMENTS = {
+  '+-': ` \\pm `,
+  'Nabla': Vector('\\nabla'),
+};
+
+const REPLACEMENTS = [
   // {
   //   id: 'list',
   //   search: /LIST \[(.*?)\]/g,
@@ -160,17 +171,10 @@ const REPLACEMENTS = [{
     search: /\+-/g,
     replace: TexChar('pm'),
   },
-
 ];
 
 export default function compiler(input) {
-  console.log(REPLACEMENTS);
-  // for (let r of REPLACEMENTS) {
-  //   if (r.replace) input = input.replace(r.search, r.replace);
-  //   // else if (r.cb) input = cb(input);
-  // }
   return Root(input);
-  // return input;
 }
 
 export {
