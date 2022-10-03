@@ -26,6 +26,8 @@ jobs:
       run: yarn install --frozen-lockfile
     - name: Run build
       run: yarn run build --if-present
+      env:
+        PUBLIC_PATH: /MathUp
     - name: Run tests
       run: yarn run test:unit
       env:
